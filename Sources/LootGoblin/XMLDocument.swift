@@ -64,4 +64,53 @@ final class XMLDocument {
 
         return Int(nodeset.pointee.nodeNr)
     }
+
+    func setValue(matching xpath: String, to value: String) throws {
+        guard let context = xmlXPathNewContext(doc) else {
+            throw XMLDocumentError.unableToCreateXPathContext
+        }
+
+        defer {
+            xmlXPathFreeContext(context)
+        }
+
+        let result = xpath.withCString { xpathCString in
+            xmlXPathEvalExpression(
+                UnsafeRawPointer(xpathCString)
+                    .assumingMemoryBound(to: xmlChar.self),
+                context
+            )
+        }
+
+        guard let result else {
+            throw XMLDocumentError.unableToEvaluateXPath
+        }
+
+        defer {
+            xmlXPathFreeObject(result)
+        }
+
+        guard let nodeSet = result.pointee.nodesetval else {
+            return
+        }
+
+        let count = Int(nodeSet.pointee.nodeNr)
+
+        guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+            return
+        }
+
+        for index in 0..<count {
+            guard let node = nodes[index] else {
+                continue
+            }
+
+            value.withCString{ valueCString in
+                xmlNodeSetContent(
+                    node,
+                    UnsafeRawPointer(valueCString)
+                        .assumingMemoryBound(to: xmlChar.self)
+                )}
+        }
+    }
 }

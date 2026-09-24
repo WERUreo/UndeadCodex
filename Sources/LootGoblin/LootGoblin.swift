@@ -21,6 +21,23 @@ struct LootGoblin {
             let materialCount = try document.countNodes(matching: "//property[@name='Material' and @value='Mmetal']")
             print("Found \(materialCount) properties matching the UL Material patch")
 
+            let beforeCount = try document.countNodes(
+                matching: "//property[@name='Material' and @value='Mmetal']"
+            )
+
+            print("Mmetal before patch: \(beforeCount)")
+
+            try document.setValue(
+                matching: "//property[@name='Material' and @value='Mmetal']/@value",
+                to: "matIron"
+            )
+
+            let afterCount = try document.countNodes(
+                matching: "//property[@name='Material' and @value='Mmetal']"
+            )
+
+            print("Mmetal after patch: \(afterCount)")
+
         } catch {
             print("Error: \(error.localizedDescription)")
         }
