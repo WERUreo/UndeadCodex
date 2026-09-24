@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:LootGoblin}",
+            "name": "Debug LootGoblin",
+            "target": "LootGoblin",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug LootGoblin"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:LootGoblin}",
+            "name": "Release LootGoblin",
+            "target": "LootGoblin",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release LootGoblin"
+        }
+    ]
+}
