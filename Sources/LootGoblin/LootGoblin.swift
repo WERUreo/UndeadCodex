@@ -16,6 +16,11 @@ struct LootGoblin {
 
             let itemCount = try GameDataLoader().countItems(at: installation.itemsURL)
             print("Found \(itemCount) vanilla items.")
+
+            let document = try XMLDocument(contentsOf: installation.itemsURL)
+            let materialCount = try document.countNodes(matching: "//property[@name='Material' and @value='Mmetal']")
+            print("Found \(materialCount) properties matching the UL Material patch")
+
         } catch {
             print("Error: \(error.localizedDescription)")
         }

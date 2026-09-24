@@ -1,5 +1,6 @@
 import Foundation
 import FoundationXML
+import CLibXML2
 
 private final class ItemCountingParserDelegate: NSObject, XMLParserDelegate {
     var itemCount = 0
