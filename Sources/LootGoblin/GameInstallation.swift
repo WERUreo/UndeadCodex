@@ -24,6 +24,18 @@ struct GameInstallation {
             .appendingPathComponent("items.xml")
     }
 
+    var modsURL: URL {
+        rootURL.appendingPathComponent("Mods")
+    }
+
+    // TODO: Remove this once we implement proper system
+    var undeadLegacyItemsURL: URL {
+        modsURL
+            .appendingPathComponent("UndeadLegacy")
+            .appendingPathComponent("Config")
+            .appendingPathComponent("items.xml")
+    }
+
     init(rootURL: URL) throws {
         var isDirectory: ObjCBool = false
 

@@ -38,6 +38,13 @@ struct LootGoblin {
 
             print("Mmetal after patch: \(afterCount)")
 
+            let ulDocument = try XMLDocument(
+                contentsOf: installation.undeadLegacyItemsURL
+            )
+
+            let setNodes = try ulDocument.nodes(matching: "//set")
+
+            print("Found \(setNodes.count) set operations.")
         } catch {
             print("Error: \(error.localizedDescription)")
         }
