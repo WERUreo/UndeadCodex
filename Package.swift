@@ -25,6 +25,9 @@ let package = Package(
         .testTarget(
             name: "LootGoblinTests",
             dependencies: ["LootGoblin"],
+            resources: [
+                .copy("Fixtures")
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],

@@ -1,8 +1,47 @@
 import Testing
+import Foundation
 @testable import LootGoblin
 
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-    // Swift Testing Documentation
-    // https://swiftpackageindex.com/swiftlang/swift-testing/documentation
+@Test func missingXPath() async throws {
+    let url = try #require(
+        Bundle.module.url(
+            forResource: "missing-xpath",
+            withExtension: "xml",
+            subdirectory: "Fixtures"
+        )
+    )
+
+    #expect(throws: PatchLoaderError.missingXPath) {
+        try PatchLoader().loadSetNodes(from: url)
+    }
+}
+
+@Test func xPathNoValue() async throws {
+    let url = try #require(
+        Bundle.module.url(
+            forResource: "xpath-novalue",
+            withExtension: "xml",
+            subdirectory: "Fixtures"
+        )
+    )
+
+    #expect(throws: PatchLoaderError.missingXPath) {
+        try PatchLoader().loadSetNodes(from: url)
+    }
+}
+
+@Test func goodSetXPath() async throws {
+    let url = try #require(
+        Bundle.module.url(
+            forResource: "good-set-xpath",
+            withExtension: "xml",
+            subdirectory: "Fixtures"
+        )
+    )
+
+    let nodes = try PatchLoader().loadSetNodes(from: url)
+    #expect(nodes.count == 1)
+
+    let node = try #require(nodes.first)
+    #expect(node.attributes["xpath"] == "/items/item[@name='testItem']")    
 }
