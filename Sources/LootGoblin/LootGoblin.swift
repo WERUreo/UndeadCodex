@@ -16,31 +16,6 @@ struct LootGoblin {
 
             let itemCount = try GameDataLoader().countItems(at: installation.itemsURL)
             print("Found \(itemCount) vanilla items.")
-
-            let document = try XMLDocument(contentsOf: installation.itemsURL)
-            let materialCount = try document.countNodes(matching: "//property[@name='Material' and @value='Mmetal']")
-            print("Found \(materialCount) properties matching the UL Material patch")
-
-            let beforeCount = try document.countNodes(
-                matching: "//property[@name='Material' and @value='Mmetal']"
-            )
-
-            print("Mmetal before patch: \(beforeCount)")
-
-            try document.setValue(
-                matching: "//property[@name='Material' and @value='Mmetal']/@value",
-                to: "matIron"
-            )
-
-            let afterCount = try document.countNodes(
-                matching: "//property[@name='Material' and @value='Mmetal']"
-            )
-
-            print("Mmetal after patch: \(afterCount)")
-
-            let setNodes = try PatchLoader().loadSetNodes(from: installation.undeadLegacyItemsURL)
-
-            print("Found \(setNodes.count) set operations.")
         } catch {
             print("Error: \(error.localizedDescription)")
         }

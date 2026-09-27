@@ -21,6 +21,7 @@ enum XMLDocumentError: LocalizedError {
 struct XMLNode {
     let attributes: [String: String]
     let content: String
+    let hasElementChildren: Bool
 }
 
 final class XMLDocument {
@@ -96,6 +97,8 @@ final class XMLDocument {
 
                 var attributes: [String: String] = [:]
                 var property = node.pointee.properties
+                var child = node.pointee.children
+                var hasElementChildren = false
 
                 while let currentProperty = property {
                     if let namePointer = currentProperty.pointee.name {
@@ -134,10 +137,20 @@ final class XMLDocument {
                         .assumingMemoryBound(to: CChar.self)
                 )
 
+                while let currentChild = child {
+                    if currentChild.pointee.type == XML_ELEMENT_NODE {
+                        hasElementChildren = true
+                        break
+                    }
+
+                    child = currentChild.pointee.next
+                }
+
                 result.append(
                     XMLNode(
                         attributes: attributes,
-                        content: content
+                        content: content,
+                        hasElementChildren: hasElementChildren
                     )
                 )
             }

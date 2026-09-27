@@ -12,15 +12,12 @@ enum PatchLoaderError: LocalizedError, Equatable {
     }
 }
 
-struct SetPatch {
-    let xpath: String
-    let value: String
-}
-
 struct PatchLoader {
-    func loadSetNodes(from url: URL) throws -> [XMLNode] {
+    func loadSetPatches(from url: URL) throws -> [SetPatch] {
         let document = try XMLDocument(contentsOf: url)
         let setNodes = try document.nodes(matching: "//set")
+        var setPatches: [SetPatch] = []
+
         for node in setNodes {
             guard
                 let xpath = node.attributes["xpath"],
@@ -28,8 +25,23 @@ struct PatchLoader {
             else {
                 throw PatchLoaderError.missingXPath
             }
-        }
+            
+            let payload: SetPatch.Payload
 
-        return setNodes
+            if node.hasElementChildren {
+                payload = .elements
+            } else {
+                payload = .value(node.content)
+            }
+
+            let patch = SetPatch(
+                xpath: xpath,
+                payload: payload
+            )
+
+            setPatches.append(patch)
+        }
+        
+        return setPatches
     }
 }

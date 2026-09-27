@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <set xpath="/items/item[@name='testItem']">
+        <property name="Group" value="Test"/>
+        <property name="Tags" value="test"/>
+    </set>
+</root>
