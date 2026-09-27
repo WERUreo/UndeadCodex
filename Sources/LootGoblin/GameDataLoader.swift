@@ -1,5 +1,9 @@
 import Foundation
-import FoundationXML
+
+#if canImport(FoundationXML)
+    import FoundationXML
+#endif
+
 import CLibXML2
 
 private final class ItemCountingParserDelegate: NSObject, XMLParserDelegate {
