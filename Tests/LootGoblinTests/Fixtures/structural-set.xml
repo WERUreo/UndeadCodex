@@ -2,6 +2,8 @@
 <root>
     <set xpath="/items/item[@name='testItem']">
         <property name="Group" value="Test"/>
-        <property name="Tags" value="test"/>
+        <anotherProperty>
+            <nestedProperty name="Nested" value="Test"/>
+        </anotherProperty>
     </set>
 </root>

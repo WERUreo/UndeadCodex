@@ -28,8 +28,8 @@ struct PatchLoader {
             
             let payload: SetPatch.Payload
 
-            if node.hasElementChildren {
-                payload = .elements
+            if !node.children.isEmpty {
+                payload = .elements(node.children)
             } else {
                 payload = .value(node.content)
             }

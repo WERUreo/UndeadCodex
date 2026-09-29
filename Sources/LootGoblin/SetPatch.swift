@@ -6,6 +6,6 @@ struct SetPatch {
 
     enum Payload: Equatable {
         case value(String)
-        case elements
+        case elements([XMLNode])
     }
 }

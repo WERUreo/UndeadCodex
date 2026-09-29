@@ -18,10 +18,11 @@ enum XMLDocumentError: LocalizedError {
     }
 }
 
-struct XMLNode {
+struct XMLNode: Equatable {
+    let name: String
     let attributes: [String: String]
     let content: String
-    let hasElementChildren: Bool
+    let children: [XMLNode]
 }
 
 final class XMLDocument {
@@ -91,68 +92,12 @@ final class XMLDocument {
             var result: [XMLNode] = []
 
             for index in 0..<count {
-                guard let node = nodes[index] else {
+                guard let node = nodes[index],
+                    let xmlNode = makeNode(from: node) else {
                     continue
                 }
 
-                var attributes: [String: String] = [:]
-                var property = node.pointee.properties
-                var child = node.pointee.children
-                var hasElementChildren = false
-
-                while let currentProperty = property {
-                    if let namePointer = currentProperty.pointee.name {
-                        let name = String(
-                            cString: UnsafeRawPointer(namePointer)
-                                .assumingMemoryBound(to: CChar.self)
-                        )
-
-                        if let valuePointer = xmlNodeListGetString(doc, currentProperty.pointee.children, 1) {
-                            let value = String(
-                                decodingCString: valuePointer, 
-                                as: UTF8.self
-                            )
-
-                            lg_xmlFree(valuePointer)
-
-                            attributes[name] = value
-                        }
-
-                    }
-
-                    property = currentProperty.pointee.next
-                }
-
-                // Extract content and attributes here
-                guard let contentPointer = xmlNodeGetContent(node) else {
-                    continue
-                }
-
-                defer {
-                    lg_xmlFree(contentPointer)
-                }
-
-                let content = String(
-                    cString: UnsafeRawPointer(contentPointer)
-                        .assumingMemoryBound(to: CChar.self)
-                )
-
-                while let currentChild = child {
-                    if currentChild.pointee.type == XML_ELEMENT_NODE {
-                        hasElementChildren = true
-                        break
-                    }
-
-                    child = currentChild.pointee.next
-                }
-
-                result.append(
-                    XMLNode(
-                        attributes: attributes,
-                        content: content,
-                        hasElementChildren: hasElementChildren
-                    )
-                )
+                result.append(xmlNode)
             }
 
             return result
@@ -190,5 +135,75 @@ private extension XMLDocument {
         }
 
         return try body(result.pointee.nodesetval)
+    }
+
+    func makeNode(from node: xmlNodePtr) -> XMLNode? {
+        guard let namePointer = node.pointee.name else {
+            return nil
+        }
+
+        let name = String(
+            cString: UnsafeRawPointer(namePointer)
+                .assumingMemoryBound(to: CChar.self)
+        )
+
+        var attributes: [String: String] = [:]
+        var property = node.pointee.properties
+        var child = node.pointee.children
+        var children: [XMLNode] = []
+
+        while let currentProperty = property {
+            if let namePointer = currentProperty.pointee.name {
+                let name = String(
+                    cString: UnsafeRawPointer(namePointer)
+                        .assumingMemoryBound(to: CChar.self)
+                )
+
+                if let valuePointer = xmlNodeListGetString(doc, currentProperty.pointee.children, 1) {
+                    let value = String(
+                        decodingCString: valuePointer, 
+                        as: UTF8.self
+                    )
+
+                    lg_xmlFree(valuePointer)
+
+                    attributes[name] = value
+                }
+
+            }
+
+            property = currentProperty.pointee.next
+        }
+
+        guard let contentPointer = xmlNodeGetContent(node) else {
+            return nil
+        }
+
+        defer {
+            lg_xmlFree(contentPointer)
+        }
+
+        let content = String(
+            cString: UnsafeRawPointer(contentPointer)
+                .assumingMemoryBound(to: CChar.self)
+        )
+
+        while let currentChild = child {
+            if currentChild.pointee.type == XML_ELEMENT_NODE {
+                if let childNode = makeNode(from: currentChild) {
+                    children.append(childNode)
+                }
+            }
+
+            child = currentChild.pointee.next
+        }
+
+        return XMLNode(
+            name: name, 
+            attributes: attributes, 
+            content: content, 
+            children: children
+        )
+
     }
 }
