@@ -21,7 +21,7 @@ enum XMLDocumentError: LocalizedError {
 struct XMLNode: Equatable {
     let name: String
     let attributes: [String: String]
-    let content: String
+    var content: String
     let children: [XMLNode]
 }
 
