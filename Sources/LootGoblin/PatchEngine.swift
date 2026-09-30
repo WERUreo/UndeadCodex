@@ -9,8 +9,11 @@ struct PatchEngine {
                 matching: patch.xpath,
                 to: value
             )
-        case .elements:
-            break
+        case .elements(let elements):
+            try document.replaceChildren(
+                matching: patch.xpath, 
+                with: elements
+            )
         }
     }
 }

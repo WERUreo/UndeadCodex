@@ -21,7 +21,7 @@ enum XMLDocumentError: LocalizedError {
 struct XMLNode: Equatable {
     let name: String
     let attributes: [String: String]
-    var content: String
+    let content: String
     let children: [XMLNode]
 }
 
@@ -103,6 +103,36 @@ final class XMLDocument {
             return result
         }
     }
+
+    func replaceChildren(matching xpath: String, with children: [XMLNode]) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return 
+            }
+
+            for index in 0..<count {
+                guard let node = nodes[index] else {
+                    continue
+                }
+
+                removeChildren(from: node)
+
+                for child in children {
+                    guard let newChild = makeLibXMLNode(from: child) else {
+                        continue
+                    }
+
+                    _ = xmlAddChild(node, newChild)
+                }
+            }
+        }
+    }
 }
 
 private extension XMLDocument {
@@ -135,6 +165,19 @@ private extension XMLDocument {
         }
 
         return try body(result.pointee.nodesetval)
+    }
+
+    func removeChildren(from node: xmlNodePtr) {
+        var child = node.pointee.children
+
+        while let currentChild = child {
+            let nextChild = currentChild.pointee.next
+
+            xmlUnlinkNode(currentChild)
+            xmlFreeNode(currentChild)
+
+            child = nextChild
+        }
     }
 
     func makeNode(from node: xmlNodePtr) -> XMLNode? {
@@ -204,6 +247,44 @@ private extension XMLDocument {
             content: content, 
             children: children
         )
+    }
 
+    func makeLibXMLNode(from node: XMLNode) -> xmlNodePtr? {
+        guard let newNode = node.name.withCString({ nameCString in
+            xmlNewNode(
+                nil, 
+                UnsafeRawPointer(nameCString)
+                    .assumingMemoryBound(to: xmlChar.self)    
+            )
+        }) else {
+            return nil
+        }
+
+        for (name, value) in node.attributes {
+            _ = name.withCString { nameCString in
+                value.withCString { valueCString in
+                    xmlNewProp(
+                        newNode,
+                        UnsafeRawPointer(nameCString)
+                            .assumingMemoryBound(to: xmlChar.self),
+                        UnsafeRawPointer(valueCString)
+                            .assumingMemoryBound(to: xmlChar.self)
+                    )
+                }
+            }
+        }
+
+        for child in node.children {
+            guard let newChild = makeLibXMLNode(from: child) else {
+                continue
+            }
+
+            _ = xmlAddChild(
+                newNode,
+                newChild
+            )
+        }
+
+        return newNode
     }
 }

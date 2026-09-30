@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items>
+    <item name="testItem">
+        <property name="OldProperty1" value="oldValue1"/>
+        <property name="OldProperty2" value="oldValue2"/>
+    </item>
+</items>
