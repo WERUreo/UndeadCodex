@@ -16,4 +16,10 @@ struct PatchEngine {
             )
         }
     }
+
+    func apply(_ patches: [SetPatch], to document: XMLDocument) throws {
+        for patch in patches {
+            try apply(patch, to: document)
+        }
+    }
 }

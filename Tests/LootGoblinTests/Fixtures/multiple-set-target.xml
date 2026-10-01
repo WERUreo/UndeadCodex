@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items>
+    <item name="testItem">
+        <property name="Material" value="Mmetal"/>
+        <property name="Stacknumber" value="300"/>
+    </item>
+</items>

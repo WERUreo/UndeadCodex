@@ -19,6 +19,5 @@ struct LootGoblin {
         } catch {
             print("Error: \(error.localizedDescription)")
         }
-
     }
 }

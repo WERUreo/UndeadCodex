@@ -85,3 +85,34 @@ func appliesElementSetPatch() throws {
         ) == 1
     )
 }
+
+@Test
+func appliesMultipleSetPatches() throws {
+    let url = try fixtureURL(named: "multiple-set-target")
+    let document = try XMLDocument(contentsOf: url)
+
+    let patches = [
+        SetPatch(
+            xpath: "//property[@name='Material']/@value",
+            payload: .value("matIron")
+        ),
+        SetPatch(
+            xpath: "//property[@name='Stacknumber']/@value",
+            payload: .value("500")
+        )
+    ]
+
+    try PatchEngine().apply(patches, to: document)
+
+    #expect(
+        try document.countNodes(
+            matching: "//property[@name='Material' and @value='matIron']"
+        ) == 1
+    )
+
+    #expect(
+        try document.countNodes(
+            matching: "//property[@name='Stacknumber' and @value='500']"
+        ) == 1
+    )
+}

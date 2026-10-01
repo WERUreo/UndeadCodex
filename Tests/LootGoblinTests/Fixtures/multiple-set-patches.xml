@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+    <set xpath="//property[@name='Material']/@value">matIron</set>
+    <set xpath="//property[@name='Stacknumber']/@value">500</set>
+</configs>
