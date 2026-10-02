@@ -14,8 +14,8 @@ struct LootGoblin {
             let installation = try GameInstallation(rootURL: gameURL)
             print("Valid 7DTD installation found at \(installation.rootURL.path)")
 
-            let itemCount = try GameDataLoader().countItems(at: installation.itemsURL)
-            print("Found \(itemCount) vanilla items.")
+            let items = try ItemLoader().loadItems(from: installation.itemsURL)
+            print("Found \(items.count) vanilla items.")
         } catch {
             print("Error: \(error.localizedDescription)")
         }
