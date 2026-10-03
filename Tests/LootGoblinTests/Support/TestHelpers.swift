@@ -1,12 +1,15 @@
 import Foundation
 import Testing
 
-func fixtureURL(named name: String) throws -> URL {
-    try #require(
-        Bundle.module.url(
-            forResource: name,
-            withExtension: "xml",
-            subdirectory: "Fixtures"
-        )
+func fixtureURL(
+    named name: String, 
+    extension fileExtension: String = "xml"
+) throws -> URL {
+    let url = Bundle.module.url(
+        forResource: name,
+        withExtension: fileExtension,
+        subdirectory: "Fixtures"
     )
+
+    return try #require(url)
 }
