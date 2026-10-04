@@ -1,3 +1,5 @@
+import Foundation
+
 struct ItemCatalog {
     let items: [Item]
     let localization: [LocalizationEntry]
@@ -20,5 +22,18 @@ struct ItemCatalog {
         }
 
         return item(named: entry.key)
+    }
+
+    func search(_ query: String) -> [Item] {
+        items.filter { item in
+            let entry = localization.first {
+                $0.key == item.name
+            }
+
+            let internalNameMatches = item.name.localizedCaseInsensitiveContains(query)
+            let localizedNameMatches = entry?.english.localizedCaseInsensitiveContains(query) ?? false
+
+            return internalNameMatches || localizedNameMatches
+        }
     }
 }

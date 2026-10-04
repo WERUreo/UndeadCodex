@@ -74,3 +74,85 @@ func returnsNilForUnknownLocalizedName() {
 
     #expect(catalog.item(localizedName: "Banana Launcher") == nil)
 }
+
+@Test
+func searchesItemsByLocalizedName() {
+    let items = [
+        Item(name: "firstItem", properties: [:]),
+        Item(name: "secondItem", properties: [:]),
+        Item(name: "resourceWood", properties: [:])
+    ]
+
+    let localization = [
+        LocalizationEntry(
+            key: "firstItem",
+            file: "items",
+            type: "Ammo",
+            english: "9mm Ammo"
+        ),
+        LocalizationEntry(
+            key: "secondItem",
+            file: "items",
+            type: "Ammo",
+            english: ".44 Magnum Ammo"
+        ),
+        LocalizationEntry(
+            key: "resourceWood",
+            file: "items",
+            type: "Resource",
+            english: "Wood"
+        )
+    ]
+
+    let catalog = ItemCatalog(
+        items: items,
+        localization: localization
+    )
+
+    let results = catalog.search("ammo")
+
+    #expect(results.count == 2)
+    #expect(results.contains { $0.name == "firstItem" })
+    #expect(results.contains { $0.name == "secondItem" })
+}
+
+@Test
+func searchesItemsByInternalName() {
+    let items = [
+        Item(name: "ammo9mmBulletBall", properties: [:]),
+        Item(name: "ammo44MagnumBulletBall", properties: [:]),
+        Item(name: "resourceWood", properties: [:])
+    ]
+
+    let catalog = ItemCatalog(items: items)
+
+    let results = catalog.search("ammo9mm")
+
+    #expect(results.count == 1)
+    #expect(results.first?.name == "ammo9mmBulletBall")
+}
+
+@Test
+func searchDoesNotReturnDuplicateItems() {
+    let items = [
+        Item(name: "ammo9mmBulletBall", properties: [:])
+    ]
+
+    let localization = [
+        LocalizationEntry(
+            key: "ammo9mmBulletBall",
+            file: "items",
+            type: "Ammo",
+            english: "9mm Ammo"
+        )
+    ]
+
+    let catalog = ItemCatalog(
+        items: items,
+        localization: localization
+    )
+
+    let results = catalog.search("ammo")
+
+    #expect(results.count == 1)
+}

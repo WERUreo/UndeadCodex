@@ -24,6 +24,13 @@ struct GameInstallation {
             .appendingPathComponent("items.xml")
     }
 
+    var localizationURL: URL {
+        rootURL
+            .appendingPathComponent("Data")
+            .appendingPathComponent("Config")
+            .appendingPathComponent("Localization.txt")
+    }
+
     var modsURL: URL {
         rootURL.appendingPathComponent("Mods")
     }
