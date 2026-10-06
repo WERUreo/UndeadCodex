@@ -18,7 +18,13 @@ struct LootGoblin {
             let items = try ItemLoader().loadItems(from: installation.itemsURL)
             // print("Found \(items.count) vanilla items.")
 
-            let localization = try LocalizationLoader().load(from: installation.localizationURL)
+            let localization: [LocalizationEntry]
+
+            if let localizationURL = installation.localizationURL {
+                localization = try LocalizationLoader().load(from: localizationURL)
+            } else {
+                localization = []
+            }
 
             let catalog = ItemCatalog(
                 items: items,

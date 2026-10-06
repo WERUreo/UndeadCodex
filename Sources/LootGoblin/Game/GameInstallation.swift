@@ -17,18 +17,29 @@ enum GameInstallationError: LocalizedError {
 struct GameInstallation {
     let rootURL: URL
 
-    var itemsURL: URL {
+    var configURL: URL {
         rootURL
             .appendingPathComponent("Data")
             .appendingPathComponent("Config")
-            .appendingPathComponent("items.xml")
     }
 
-    var localizationURL: URL {
-        rootURL
-            .appendingPathComponent("Data")
-            .appendingPathComponent("Config")
-            .appendingPathComponent("Localization.txt")
+    var itemsURL: URL {
+        configURL.appendingPathComponent("items.xml")
+    }
+
+    var localizationURL: URL? {
+        let csvURL = configURL.appendingPathComponent("Localization.csv")
+        let txtURL = configURL.appendingPathComponent("Localization.txt")
+
+        if FileManager.default.fileExists(atPath: csvURL.path) {
+            return csvURL
+        }
+
+        if FileManager.default.fileExists(atPath: txtURL.path) {
+            return txtURL
+        }
+
+        return nil
     }
 
     var modsURL: URL {

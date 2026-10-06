@@ -21,3 +21,23 @@ func loadsLocalizationEntries() throws {
     #expect(ammo.type == "Ammo")
     #expect(ammo.english == "9mm Ammo")
 }
+
+@Test
+func loadsLocalizationFrom3xFormat() throws {
+    let url = try fixtureURL(
+        named: "Localization",
+        extension: "csv"
+    )
+
+    let entries = try LocalizationLoader().load(from: url)
+
+    #expect(entries.count == 2)
+
+    let ammo = try #require(
+        entries.first { $0.key == "ammo9mmBulletBall" }
+    )
+
+    #expect(ammo.file == "items")
+    #expect(ammo.type == "Ammo")
+    #expect(ammo.english == "9mm Ammo")
+}
