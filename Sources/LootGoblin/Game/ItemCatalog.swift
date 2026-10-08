@@ -24,8 +24,8 @@ struct ItemCatalog {
         return item(named: entry.key)
     }
 
-    func search(_ query: String) -> [Item] {
-        items.filter { item in
+    func search(_ query: String) -> [ItemSearchResult] {
+        items.compactMap { item in
             let entry = localization.first {
                 $0.key == item.name
             }
@@ -33,7 +33,14 @@ struct ItemCatalog {
             let internalNameMatches = item.name.localizedCaseInsensitiveContains(query)
             let localizedNameMatches = entry?.english.localizedCaseInsensitiveContains(query) ?? false
 
-            return internalNameMatches || localizedNameMatches
+            guard internalNameMatches || localizedNameMatches else {
+                return nil
+            }
+
+            return ItemSearchResult(
+                item: item,
+                localizedName: entry?.english
+            )
         }
     }
 }

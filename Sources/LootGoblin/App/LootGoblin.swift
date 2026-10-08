@@ -33,8 +33,12 @@ struct LootGoblin {
 
             let results = catalog.search(query)
 
-            for item in results {
-                print(item.name)
+            for result in results {
+                if let localizedName = result.localizedName {
+                    print("\(localizedName) (\(result.item.name))")
+                } else {
+                    print(result.item.name)
+                }
             }
         } catch {
             print("Error: \(error.localizedDescription)")

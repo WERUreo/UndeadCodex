@@ -112,8 +112,18 @@ func searchesItemsByLocalizedName() {
     let results = catalog.search("ammo")
 
     #expect(results.count == 2)
-    #expect(results.contains { $0.name == "firstItem" })
-    #expect(results.contains { $0.name == "secondItem" })
+
+    let firstResult = results.first {
+        $0.item.name == "firstItem"
+    }
+
+    #expect(firstResult?.localizedName == "9mm Ammo")
+
+    let secondResult = results.first {
+        $0.item.name == "secondItem"
+    }
+
+    #expect(secondResult?.localizedName == ".44 Magnum Ammo")
 }
 
 @Test
@@ -129,7 +139,8 @@ func searchesItemsByInternalName() {
     let results = catalog.search("ammo9mm")
 
     #expect(results.count == 1)
-    #expect(results.first?.name == "ammo9mmBulletBall")
+    #expect(results.first?.item.name == "ammo9mmBulletBall")
+    #expect(results.first?.localizedName == nil)
 }
 
 @Test
