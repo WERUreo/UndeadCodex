@@ -167,3 +167,37 @@ func searchDoesNotReturnDuplicateItems() {
 
     #expect(results.count == 1)
 }
+
+@Test
+func findsLocalizedNameForItem() throws {
+    let items = [
+        Item(name: "ammo9mmBulletBall", properties: [:]),
+        Item(name: "resourceWood", properties: [:])
+    ]
+
+    let localization = [
+        LocalizationEntry(
+            key: "ammo9mmBulletBall",
+            file: "items",
+            type: "Ammo",
+            english: "9mm Ammo"
+        ),
+        LocalizationEntry(
+            key: "resourceWood",
+            file: "items",
+            type: "Resource",
+            english: "Wood"
+        )
+    ]
+
+    let catalog = ItemCatalog(
+        items: items,
+        localization: localization
+    )
+
+    let item = try #require(
+        catalog.item(named: "ammo9mmBulletBall")
+    )
+
+    #expect(catalog.localizedName(for: item) == "9mm Ammo")
+}
