@@ -1,0 +1,11 @@
+<blocks>
+    <block name="woodShapes">
+        <drop event="Harvest" name="resourceWood" count="2" />
+        <drop event="Destroy" count="0" />
+        <drop event="Fall" name="terrDestroyedWoodDebris" count="1" prob="0.75" />
+    </block>
+    <block name="stoneShapes">
+        <drop event="Harvest" name="resourceRockSmall" count="4,6" />
+        <drop event="Destroy" count="0" />
+    </block>
+</blocks>

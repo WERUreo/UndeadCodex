@@ -36,6 +36,24 @@ final class XMLDocument {
         self.doc = doc
     }
 
+    init(data: Data) throws {
+        let doc = data.withUnsafeBytes { buffer in
+            xmlReadMemory(
+                buffer.baseAddress?.assumingMemoryBound(to: CChar.self),
+                Int32(buffer.count),
+                nil,
+                nil,
+                0
+            )
+        }
+
+        guard let doc else {
+            throw XMLDocumentError.unableToReadFile
+        }
+
+        self.doc = doc
+    }
+
     deinit {
         xmlFreeDoc(doc)
     }
