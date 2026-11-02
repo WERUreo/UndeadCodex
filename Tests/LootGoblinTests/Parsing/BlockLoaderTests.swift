@@ -111,3 +111,25 @@ func handlesCircularBlockInheritance() throws {
         $0.itemName == "resourceRockSmall"
     })
 }
+
+@Test
+func reportsCircularBlockInheritance() throws {
+    let xml = """
+    <blocks>
+        <block name="woodA">
+            <property name="Extends" value="woodB" />
+        </block>
+        <block name="woodB">
+            <property name="Extends" value="woodA" />
+        </block>
+    </blocks>
+    """
+
+    let result = try BlockLoader.loadWithDiagnostics(
+        from: Data(xml.utf8)
+    )
+
+    #expect(result.blocks.count == 2)
+    #expect(result.diagnostics.count == 1)
+    #expect(result.diagnostics.first?.severity == .warning)
+}

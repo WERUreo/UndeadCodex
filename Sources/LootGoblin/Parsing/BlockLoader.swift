@@ -2,6 +2,12 @@ import Foundation
 
 enum BlockLoader {
     static func load(from data: Data) throws -> [Block] {
+        try loadWithDiagnostics(from: data).blocks
+    }
+
+    static func loadWithDiagnostics(
+        from data: Data
+    ) throws -> BlockLoadResult {
         let document = try XMLDocument(data: data)
         let nodes = try document.nodes(matching: "/blocks/block")
 
@@ -43,11 +49,25 @@ enum BlockLoader {
             uniqueKeysWithValues: blocks.map { ($0.name, $0) }
         )
 
+        var diagnostics: [Diagnostic] = []
+        var reportedCycles: Set<Set<String>> = []
+
         func resolveDrops(
             for block: Block,
             visited: Set<String> = []
         ) -> [Block.Drop] {
             if visited.contains(block.name) {
+                let cycle = visited.union([block.name])
+
+                if reportedCycles.insert(cycle).inserted {
+                    diagnostics.append(
+                        Diagnostic(
+                            severity: .warning,
+                            message: "Circular inheritance detected for block '\(block.name)'"
+                        )
+                    )
+                }
+                
                 return []
             }
 
@@ -64,12 +84,17 @@ enum BlockLoader {
             return inheritedDrops + block.drops
         }
 
-        return blocks.map { block in
+        let resolvedBlocks = blocks.map { block in
             Block(
                 name: block.name,
                 parentName: block.parentName,
                 drops: resolveDrops(for: block)
             )
         }
+
+        return BlockLoadResult(
+            blocks: resolvedBlocks,
+            diagnostics: diagnostics
+        )
     }
 }
