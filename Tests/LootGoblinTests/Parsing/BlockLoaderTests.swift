@@ -133,3 +133,57 @@ func reportsCircularBlockInheritance() throws {
     #expect(result.diagnostics.count == 1)
     #expect(result.diagnostics.first?.severity == .warning)
 }
+
+@Test
+func doesNotDuplicateCircularInheritanceWarnings() throws {
+    let xml = """
+    <blocks>
+        <block name="woodA">
+            <property name="Extends" value="woodB" />
+        </block>
+        <block name="woodB">
+            <property name="Extends" value="woodA" />
+        </block>
+        <block name="woodC">
+            <property name="Extends" value="woodA" />
+        </block>
+    </blocks>
+    """
+
+    let result = try BlockLoader.loadWithDiagnostics(
+        from: Data(xml.utf8)
+    )
+
+    #expect(result.blocks.count == 3)
+    #expect(result.diagnostics.count == 1)
+}
+
+@Test
+func reportsIndependentCircularInheritanceWarnings() throws {
+    let xml = """
+    <blocks>
+        <block name="woodA">
+            <property name="Extends" value="woodB" />
+        </block>
+        <block name="woodB">
+            <property name="Extends" value="woodA" />
+        </block>
+        <block name="stoneA">
+            <property name="Extends" value="stoneB" />
+        </block>
+        <block name="stoneB">
+            <property name="Extends" value="stoneA" />
+        </block>
+    </blocks>
+    """
+
+    let result = try BlockLoader.loadWithDiagnostics(
+        from: Data(xml.utf8)
+    )
+
+    #expect(result.blocks.count == 4)
+    #expect(result.diagnostics.count == 2)
+    #expect(result.diagnostics.allSatisfy {
+        $0.severity == .warning
+    })
+}

@@ -54,20 +54,20 @@ enum BlockLoader {
 
         func resolveDrops(
             for block: Block,
-            visited: Set<String> = []
+            visited: [String] = []
         ) -> [Block.Drop] {
-            if visited.contains(block.name) {
-                let cycle = visited.union([block.name])
+            if let cycleStart = visited.firstIndex(of: block.name) {
+                let cycle = Set(visited[cycleStart...])
 
                 if reportedCycles.insert(cycle).inserted {
                     diagnostics.append(
                         Diagnostic(
                             severity: .warning,
-                            message: "Circular inheritance detected for block '\(block.name)'"
+                            message: "Circular inheritance detected for blocks: \(cycle.sorted().joined(separator: ", "))"
                         )
                     )
                 }
-                
+
                 return []
             }
 
@@ -78,7 +78,7 @@ enum BlockLoader {
 
             let inheritedDrops = resolveDrops(
                 for: parent,
-                visited: visited.union([block.name])
+                visited: visited + [block.name]
             )
 
             return inheritedDrops + block.drops
