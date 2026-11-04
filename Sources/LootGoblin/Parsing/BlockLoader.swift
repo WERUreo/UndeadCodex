@@ -23,6 +23,10 @@ enum BlockLoader {
                 }?
                 .attributes["value"]
 
+            let dropExtendsOff = node.children.contains {
+                $0.name == "dropextendsoff"
+            }
+
             let drops = node.children.compactMap { child -> Block.Drop? in
                 guard child.name == "drop",
                       let eventName = child.attributes["event"],
@@ -41,7 +45,8 @@ enum BlockLoader {
             return Block(
                 name: name, 
                 parentName: parentName,
-                drops: drops
+                drops: drops,
+                dropExtendsOff: dropExtendsOff
             )
         }
 
@@ -71,7 +76,8 @@ enum BlockLoader {
                 return []
             }
 
-            guard let parentName = block.parentName,
+            guard !block.dropExtendsOff,
+                  let parentName = block.parentName,
                   let parent = blocksByName[parentName] else {
                     return block.drops
             }
@@ -88,7 +94,8 @@ enum BlockLoader {
             Block(
                 name: block.name,
                 parentName: block.parentName,
-                drops: resolveDrops(for: block)
+                drops: resolveDrops(for: block),
+                dropExtendsOff: block.dropExtendsOff
             )
         }
 

@@ -187,3 +187,55 @@ func reportsIndependentCircularInheritanceWarnings() throws {
         $0.severity == .warning
     })
 }
+
+@Test
+func disablesInheritedDrops() throws {
+    let xml = """
+    <blocks>
+        <block name="woodBase">
+            <drop event="Harvest" name="resourceWood" count="2" />
+        </block>
+        <block name="woodChild">
+            <property name="Extends" value="woodBase" />
+            <dropextendsoff />
+            <drop event="Harvest" name="resourceScrapIron" count="1" />
+        </block>
+    </blocks>
+    """
+
+    let blocks = try BlockLoader.load(from: Data(xml.utf8))
+    let child = try #require(
+        blocks.first { $0.name == "woodChild" }
+    )
+
+    #expect(child.drops.count == 1)
+    #expect(child.drops.first?.itemName == "resourceScrapIron")
+}
+
+@Test
+func stopsDropInheritanceAtIntermediateBlock() throws {
+    let xml = """
+    <blocks>
+        <block name="woodBase">
+            <drop event="Harvest" name="resourceWood" count="2" />
+        </block>
+        <block name="woodMiddle">
+            <property name="Extends" value="woodBase" />
+            <dropextendsoff />
+            <drop event="Harvest" name="resourceScrapIron" count="1" />
+        </block>
+        <block name="woodChild">
+            <property name="Extends" value="woodMiddle" />
+        </block>
+    </blocks>
+    """
+
+    let blocks = try BlockLoader.load(from: Data(xml.utf8))
+
+    let child = try #require(
+        blocks.first { $0.name == "woodChild" }
+    )
+
+    #expect(child.drops.count == 1)
+    #expect(child.drops.first?.itemName == "resourceScrapIron")
+}

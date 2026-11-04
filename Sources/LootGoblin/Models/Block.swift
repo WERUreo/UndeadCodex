@@ -2,15 +2,18 @@ struct Block: Equatable {
     let name: String
     let parentName: String?
     let drops: [Drop]
+    let dropExtendsOff: Bool
 
     init(
         name: String, 
         parentName: String? = nil,
-        drops: [Drop] = []
+        drops: [Drop] = [],
+        dropExtendsOff: Bool = false
     ) {
         self.name = name
         self.parentName = parentName
         self.drops = drops
+        self.dropExtendsOff = dropExtendsOff
     }
 }
 
