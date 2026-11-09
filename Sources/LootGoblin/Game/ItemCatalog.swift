@@ -4,6 +4,10 @@ struct ItemCatalog {
     let items: [Item]
     let localization: [LocalizationEntry]
 
+    private var localizationCatalog: LocalizationCatalog {
+        LocalizationCatalog(entries: localization)
+    }
+
     init(
         items: [Item],
         localization: [LocalizationEntry] = []
@@ -17,11 +21,15 @@ struct ItemCatalog {
     }
 
     func item(localizedName: String) -> Item? {
-        guard let entry = localization.first(where: { $0.english == localizedName }) else {
+        guard let key = localizationCatalog.key(for: localizedName) else {
             return nil
         }
 
-        return item(named: entry.key)
+        return item(named: key)
+    }
+
+    func localizedName(for item: Item) -> String? {
+        localizationCatalog.name(for: item.name)
     }
 
     func search(_ query: String) -> [ItemSearchResult] {
@@ -40,9 +48,5 @@ struct ItemCatalog {
                 localizedName: localizedName
             )
         }
-    }
-
-    func localizedName(for item: Item) -> String? {
-        localization.first { $0.key == item.name }?.english
     }
 }

@@ -201,3 +201,27 @@ func findsLocalizedNameForItem() throws {
 
     #expect(catalog.localizedName(for: item) == "9mm Ammo")
 }
+
+@Test
+func findsItemByLocalizedNameIgnoringCase() {
+    let item = Item(
+        name: "resourceMechanicalParts",
+        properties: [:]
+    )
+
+    let localization = LocalizationEntry(
+        key: "resourceMechanicalParts",
+        file: "items",
+        type: "item",
+        english: "Mechanical Parts"
+    )
+
+    let catalog = ItemCatalog(
+        items: [item],
+        localization: [localization]
+    )
+
+    let result = catalog.item(localizedName: "mechanical parts")
+
+    #expect(result?.name == "resourceMechanicalParts")
+}

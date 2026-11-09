@@ -4,6 +4,14 @@ struct Item: Equatable {
     let name: String
     let properties: [String: String]
 
+    init(
+        name: String,
+        properties: [String: String] = [:]
+    ) {
+        self.name = name
+        self.properties = properties
+    }
+
     var stackSize: Int? {
         properties["Stacknumber"].flatMap(Int.init)
     }

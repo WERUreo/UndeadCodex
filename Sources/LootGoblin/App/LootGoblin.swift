@@ -42,16 +42,27 @@ struct LootGoblin {
                     print("Item not found: \(itemName)")
                 }
             case .blocksDropping(let itemName):
+                let catalog = try loadItemCatalog(from: installation)
+                let localizationCatalog = LocalizationCatalog(entries: catalog.localization)
+
+                let resolvedName = catalog.item(named: itemName)?.name
+                    ?? catalog.item(localizedName: itemName)?.name
+                    ?? itemName
+
                 let data = try Data(contentsOf: installation.blocksURL)
                 let blocks = try BlockLoader.load(from: data)
 
                 let matches = BlockQuery.blocks(
-                    dropping: itemName,
+                    dropping: resolvedName,
                     from: blocks
                 )
 
                 for block in matches {
-                    print(block.name)
+                    if let localizedName = localizationCatalog.name(for: block.name) {
+                        print("\(localizedName) (\(block.name))")
+                    } else {
+                        print(block.name)
+                    }
                 }
 
                 print("Found \(matches.count) matching blocks")
