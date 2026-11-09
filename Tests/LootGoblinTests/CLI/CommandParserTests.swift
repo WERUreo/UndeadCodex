@@ -30,7 +30,7 @@ func throwsWhenInspectArgumentIsMissing() {
     let parser = CommandParser()
 
     #expect(throws: CommandParserError.missingArgument) {
-        try parser.parse(["inpsect"])
+        try parser.parse(["inspect"])
     }
 }
 
@@ -63,4 +63,15 @@ func throwsWhenCommandIsMissing() {
     #expect(throws: CommandParserError.missingCommand) {
         try parser.parse([])
     }
+}
+
+@Test
+func parsesBlockDropQuery() throws {
+    let command = try CommandParser().parse([
+        "blocks",
+        "--drops",
+        "resourceMechanicalParts"
+    ])
+
+    #expect(command == .blocksDropping("resourceMechanicalParts"))
 }

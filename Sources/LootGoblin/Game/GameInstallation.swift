@@ -27,6 +27,10 @@ struct GameInstallation {
         configURL.appendingPathComponent("items.xml")
     }
 
+    var blocksURL: URL {
+        configURL.appendingPathComponent("blocks.xml")
+    }
+
     var localizationURL: URL? {
         let csvURL = configURL.appendingPathComponent("Localization.csv")
         let txtURL = configURL.appendingPathComponent("Localization.txt")

@@ -7,22 +7,37 @@ enum CommandParserError: Error, Equatable {
 
 struct CommandParser {
     func parse(_ arguments: [String]) throws -> LootCommand {
-        switch arguments.count {
-        case 0:
+        guard let command = arguments.first else {
             throw CommandParserError.missingCommand
-        case 1:
-            throw CommandParserError.missingArgument
-        case 2:
-            break
-        default:
-            throw CommandParserError.unexpectedArgument
         }
 
-        switch arguments[0] {
-        case "inspect":
-            return .inspect(arguments[1])
-        case "search":
-            return .search(arguments[1])
+        switch command {
+        case "inspect", "search":
+            guard arguments.count >= 2 else {
+                throw CommandParserError.missingArgument
+            }
+
+            guard arguments.count == 2 else {
+                throw CommandParserError.unexpectedArgument
+            }
+
+            return command == "inspect"
+                ? .inspect(arguments[1])
+                : .search(arguments[1])
+        case "blocks":
+            guard arguments.count >= 3 else {
+                throw CommandParserError.missingArgument
+            }
+
+            guard arguments.count == 3 else {
+                throw CommandParserError.unexpectedArgument
+            }
+
+            guard arguments[1] == "--drops" else {
+                throw CommandParserError.unexpectedArgument
+            }
+
+            return .blocksDropping(arguments[2])
         default:
             throw CommandParserError.unknownCommand
         }
