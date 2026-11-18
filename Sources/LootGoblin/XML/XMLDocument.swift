@@ -151,6 +151,197 @@ final class XMLDocument {
             }
         }
     }
+
+    func appendChildren(
+        matching xpath: String,
+        with children: [XMLNode]
+    ) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return
+            }
+
+            for index in 0..<count {
+                guard let node = nodes[index] else {
+                    continue
+                }
+
+                for child in children {
+                    guard let newChild = makeLibXMLNode(from: child) else {
+                        continue
+                    }
+
+                    _ = xmlAddChild(node, newChild)
+                }
+            }
+        }
+    }
+
+    func appendValue(matching xpath: String, with value: String) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return
+            }
+
+            for index in 0..<count {
+                guard let node = nodes[index],
+                    node.pointee.type == XML_ATTRIBUTE_NODE else {
+                    continue
+                }
+
+                guard let valuePointer = xmlNodeGetContent(node) else {
+                    continue
+                }
+
+                let existing = String(
+                    cString: UnsafeRawPointer(valuePointer)
+                        .assumingMemoryBound(to: CChar.self)
+                )
+
+                lg_xmlFree(valuePointer)
+
+                xmlNodeSetContent(node, existing + value)
+            }
+        }
+    }
+
+    func insertBefore(
+        matching xpath: String,
+        with children: [XMLNode]
+    ) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return
+            }
+
+            for index in 0..<count {
+                guard let node = nodes[index] else {
+                    continue
+                }
+
+                // insertBefore only supports element targets.
+                guard node.pointee.type == XML_ELEMENT_NODE else {
+                    continue
+                }
+
+                for child in children {
+                    guard let newChild = makeLibXMLNode(from: child) else {
+                        continue
+                    }
+
+                    _ = xmlAddPrevSibling(node, newChild)
+                }
+            }
+        }
+    }
+
+    func insertAfter(
+        matching xpath: String,
+        with children: [XMLNode]
+    ) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return
+            }
+
+            for index in 0..<count {
+                guard let node = nodes[index] else {
+                    continue
+                }
+
+                guard node.pointee.type == XML_ELEMENT_NODE else {
+                    continue
+                }
+
+                for child in children.reversed() {
+                    guard let newChild = makeLibXMLNode(from: child) else {
+                        continue
+                    }
+
+                    _ = xmlAddNextSibling(node, newChild)
+                }
+            }
+        }
+    }
+
+    func removeNodes(matching xpath: String) throws {
+        try withNodes(matching: xpath) { nodeSet in
+            guard let nodeSet else {
+                return
+            }
+
+            let count = Int(nodeSet.pointee.nodeNr)
+
+            guard count > 0, let nodes = nodeSet.pointee.nodeTab else {
+                return
+            }
+
+            // Collect all matching nodes.
+            var selectedNodes: [xmlNodePtr] = []
+
+            for index in 0..<count {
+                if let node = nodes[index] {
+                    selectedNodes.append(node)
+                }
+            }
+
+            // Keep track of selected node addresses.
+            let selectedAddresses = Set(
+                selectedNodes.map { UInt(bitPattern: $0) }
+            )
+
+            // Exclude nodes whose ancestors are also selected.
+            var nodesToRemove: [xmlNodePtr] = []
+
+            for node in selectedNodes {
+                var ancestor = node.pointee.parent
+                var hasSelectedAncestor = false
+
+                while let current = ancestor {
+                    if selectedAddresses.contains(UInt(bitPattern: current)) {
+                        hasSelectedAncestor = true
+                        break
+                    }
+
+                    ancestor = current.pointee.parent
+                }
+
+                if !hasSelectedAncestor {
+                    nodesToRemove.append(node)
+                }
+            }
+
+            // All pointer inspection is finished; now it's safe to free.
+            for node in nodesToRemove {
+                xmlUnlinkNode(node)
+                xmlFreeNode(node)
+            }
+        }
+    }
 }
 
 private extension XMLDocument {

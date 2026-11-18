@@ -23,3 +23,68 @@ func loadsChildren() throws {
     #expect(node.children[1].children.count == 1)
     #expect(node.children[1].children[0].name == "nestedProperty")
 }
+
+@Test
+func removesNodesMatchingXPath() throws {
+    let xml = """
+    <blocks>
+        <block name="testBlock">
+            <property name="UnlockedBy" value="perkTest" />
+            <property name="Material" value="Mmetal" />
+        </block>
+    </blocks>
+    """
+
+    let document = try XMLDocument(data: Data(xml.utf8))
+
+    try document.removeNodes(
+        matching: "//property[@name='UnlockedBy']"
+    )
+
+    #expect(
+        try document.countNodes(
+            matching: "//property[@name='UnlockedBy']"
+        ) == 0
+    )
+
+    #expect(
+        try document.countNodes(
+            matching: "//property[@name='Material']"
+        ) == 1
+    )
+}
+
+@Test
+func removesOverlappingNodesSafely() throws {
+    let xml = """
+    <blocks>
+        <block name="removeMe">
+            <property name="Material" value="Mmetal"/>
+        </block>
+        <block name="keepMe">
+            <property name="Material" value="Mwood"/>
+        </block>
+    </blocks>
+    """
+
+    let document = try XMLDocument(data: Data(xml.utf8))
+
+    try document.removeNodes(
+        matching: "//block[@name='removeMe'] | //block[@name='removeMe']/property"
+    )
+
+    #expect(
+        try document.countNodes(matching: "//block[@name='removeMe']")
+        == 0
+    )
+
+    #expect(
+        try document.countNodes(matching: "//block[@name='keepMe']")
+        == 1
+    )
+
+    #expect(
+        try document.countNodes(matching: "//block[@name='keepMe']/property")
+        == 1
+    )
+}
