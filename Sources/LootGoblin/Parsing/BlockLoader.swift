@@ -1,14 +1,26 @@
 import Foundation
 
 enum BlockLoader {
+    // Load vanilla XML directly
     static func load(from data: Data) throws -> [Block] {
         try loadWithDiagnostics(from: data).blocks
+    }
+
+    // Load an already-patched XML document
+    static func load(from document: XMLDocument) throws -> [Block] {
+        try loadWithDiagnostics(from: document).blocks
     }
 
     static func loadWithDiagnostics(
         from data: Data
     ) throws -> BlockLoadResult {
         let document = try XMLDocument(data: data)
+        return try loadWithDiagnostics(from: document)
+    }
+
+    static func loadWithDiagnostics(
+        from document: XMLDocument
+    ) throws -> BlockLoadResult {
         let nodes = try document.nodes(matching: "/blocks/block")
 
         let blocks = nodes.compactMap { node -> Block? in

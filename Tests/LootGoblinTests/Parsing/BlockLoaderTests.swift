@@ -239,3 +239,37 @@ func stopsDropInheritanceAtIntermediateBlock() throws {
     #expect(child.drops.count == 1)
     #expect(child.drops.first?.itemName == "resourceScrapIron")
 }
+
+@Test
+func loadsBlocksFromPatchedXMLDocument() throws {
+    let vanillaXML = """
+    <blocks>
+        <block name="testBlock">
+            <drop event="Harvest" name="resourceWood" count="1"/>
+        </block>
+    </blocks>
+    """
+
+    let patchXML = """
+    <Subquake>
+        <set xpath="/blocks/block[@name='testBlock']/drop[@name='resourceWood']/@count">3,6</set>
+    </Subquake>
+    """
+
+    let document = try XMLDocument(data: Data(vanillaXML.utf8))
+    let modifications = try XMLDocument(data: Data(patchXML.utf8))
+
+    try XMLModifier().apply(modifications, to: document)
+
+    let result = try BlockLoader.loadWithDiagnostics(from: document)
+
+    let block = try #require(
+        result.blocks.first { $0.name == "testBlock" }
+    )
+
+    let drop = try #require(
+        block.drops.first { $0.itemName == "resourceWood" }
+    )
+
+    #expect(drop.count == "3,6")
+}
