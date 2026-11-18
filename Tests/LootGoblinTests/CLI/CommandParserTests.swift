@@ -75,3 +75,36 @@ func parsesBlockDropQuery() throws {
 
     #expect(command == .blocksDropping("resourceMechanicalParts"))
 }
+
+@Test
+func parsesModOptionWithBlocksCommand() throws {
+    let options = try CommandParser().parseOptions([
+        "--mod",
+        "UndeadLegacy",
+        "blocks",
+        "--drops",
+        "resourceElectricParts"
+    ])
+
+    #expect(options.modName == "UndeadLegacy")
+    #expect(options.command == .blocksDropping("resourceElectricParts"))
+}
+
+@Test
+func parsesOptionsWithoutMod() throws {
+    let options = try CommandParser().parseOptions([
+        "blocks",
+        "--drops",
+        "resourceWood"
+    ])
+
+    #expect(options.modName == nil)
+    #expect(options.command == .blocksDropping("resourceWood"))
+}
+
+@Test
+func rejectsMissingModName() {
+    #expect(throws: CommandParserError.missingArgument) {
+        try CommandParser().parseOptions(["--mod"])
+    }
+}

@@ -42,4 +42,28 @@ struct CommandParser {
             throw CommandParserError.unknownCommand
         }
     }
+
+    func parseOptions(_ arguments: [String]) throws -> CLIOptions {
+        guard arguments.first == "--mod" else {
+            return CLIOptions(
+                modName: nil,
+                command: try parse(arguments)
+            )
+        }
+
+        guard arguments.count >= 2 else {
+            throw CommandParserError.missingArgument
+        }
+
+        let modName = arguments[1]
+
+        let command = try parse(
+            Array(arguments.dropFirst(2))
+        )
+
+        return CLIOptions(
+            modName: modName,
+            command: command
+        )
+    }
 }

@@ -11,7 +11,7 @@ struct LootGoblin {
         let gameURL = URL(fileURLWithPath: CommandLine.arguments[1])
 
         do {
-            let command = try CommandParser().parse(
+            let options = try CommandParser().parseOptions(
                 Array(CommandLine.arguments.dropFirst(2))
             )
 
@@ -19,7 +19,7 @@ struct LootGoblin {
             // print("Valid 7DTD installation found at \(installation.rootURL.path)")
 
             
-            switch command {
+            switch options.command {
             case .search(let query):
                 let catalog = try loadItemCatalog(from: installation)
                 let results = catalog.search(query)
@@ -49,8 +49,10 @@ struct LootGoblin {
                     ?? catalog.item(localizedName: itemName)?.name
                     ?? itemName
 
-                let data = try Data(contentsOf: installation.blocksURL)
-                let blocks = try BlockLoader.load(from: data)
+                let blocks = try loadBlocks(
+                    from: installation,
+                    modName: options.modName
+                )
 
                 let matches = BlockQuery.blocks(
                     dropping: resolvedName,
@@ -93,5 +95,26 @@ struct LootGoblin {
             items: items,
             localization: localization
         )
+    }
+
+    static func loadBlocks(
+        from installation: GameInstallation,
+        modName: String? = nil
+    ) throws -> [Block] {
+        guard let modName else {
+            let data = try Data(contentsOf: installation.blocksURL)
+            return try BlockLoader.load(from: data)
+        }
+
+        let modDirectory = installation.rootURL
+            .appendingPathComponent("Mods")
+            .appendingPathComponent(modName)
+
+        let document = try ModLoader.loadBlocks(
+            gameDirectory: installation.rootURL,
+            modDirectory: modDirectory
+        )
+
+        return try BlockLoader.load(from: document)
     }
 }
