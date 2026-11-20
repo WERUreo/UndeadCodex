@@ -69,3 +69,34 @@ func findsBlocksWithInheritedHarvestDrops() throws {
 
     #expect(Set(matches.map(\.name)) == Set(["woodBase", "woodChild"]))
 }
+
+@Test
+func findsMatchingDropsWithDetails() {
+    let block = Block(
+        name: "testBlock",
+        parentName: nil,
+        drops: [
+            Block.Drop(
+                event: .harvest,
+                itemName: "resourceWood",
+                count: "2,5"
+            ),
+            Block.Drop(
+                event: .harvest,
+                itemName: "resourceStone",
+                count: "1"
+            )
+        ],
+        dropExtendsOff: false
+    )
+
+    let matches = BlockQuery.matches(
+        dropping: "resourceWood",
+        from: [block]
+    )
+
+    #expect(matches.count == 1)
+    #expect(matches.first?.block.name == "testBlock")
+    #expect(matches.first?.drops.count == 1)
+    #expect(matches.first?.drops.first?.count == "2,5")
+}

@@ -54,17 +54,18 @@ struct LootGoblin {
                     modName: options.modName
                 )
 
-                let matches = BlockQuery.blocks(
+                let matches = BlockQuery.matches(
                     dropping: resolvedName,
                     from: blocks
                 )
 
-                for block in matches {
-                    if let localizedName = localizationCatalog.name(for: block.name) {
-                        print("\(localizedName) (\(block.name))")
-                    } else {
-                        print(block.name)
-                    }
+                let formatter = BlockDropFormatter(
+                    localization: localizationCatalog
+                )
+
+                for match in matches {
+                    print(formatter.format(match))
+                    print()
                 }
 
                 print("Found \(matches.count) matching blocks")
