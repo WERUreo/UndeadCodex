@@ -42,17 +42,19 @@ struct LootGoblin {
                     print("Item not found: \(itemName)")
                 }
             case .blocksDropping(let itemName):
-                let catalog = try loadItemCatalog(from: installation)
-                let localizationCatalog = LocalizationCatalog(entries: catalog.localization)
-
-                let resolvedName = catalog.item(named: itemName)?.name
-                    ?? catalog.item(localizedName: itemName)?.name
-                    ?? itemName
+                let localizationCatalog = try loadLocalizationCatalog(
+                    from: installation,
+                    modName: options.modName
+                )
 
                 let blocks = try loadBlocks(
                     from: installation,
                     modName: options.modName
                 )
+
+                let resolvedName = blocks.contains(where: {
+                    $0.drops.contains { $0.itemName == itemName }
+                }) ? itemName : localizationCatalog.key(for: itemName) ?? itemName
 
                 let matches = BlockQuery.matches(
                     dropping: resolvedName,
@@ -82,19 +84,47 @@ struct LootGoblin {
             from: installation.itemsURL
         )
 
-        let localization: [LocalizationEntry]
-
-        if let localizationURL = installation.localizationURL {
-            localization = try LocalizationLoader().load(
-                from: localizationURL
-            )
-        } else {
-            localization = []
-        }
+        let localization = try loadLocalizationCatalog(
+            from: installation
+        )
 
         return ItemCatalog(
             items: items,
-            localization: localization
+            localization: localization.entries
+        )
+    }
+
+    static func loadLocalizationCatalog(
+        from installation: GameInstallation,
+        modName: String? = nil
+    ) throws -> LocalizationCatalog {
+        let entries: [LocalizationEntry]
+
+        if let localizationURL = installation.localizationURL {
+            entries = try LocalizationLoader().load(
+                from: localizationURL
+            )
+        } else {
+            entries = []
+        }
+
+        let patches: [LocalizationEntry]
+
+        if let modName {
+            let modDirectory = installation.rootURL
+                .appendingPathComponent("Mods")
+                .appendingPathComponent(modName)
+
+            patches = try ModLoader.loadLocalization(
+                modDirectory: modDirectory
+            )
+        } else {
+            patches = []
+        }
+
+        return LocalizationCatalog(
+            entries: entries,
+            patches: patches
         )
     }
 

@@ -41,3 +41,44 @@ func loadsLocalizationFrom3xFormat() throws {
     #expect(ammo.type == "Ammo")
     #expect(ammo.english == "9mm Ammo")
 }
+
+@Test
+func loadsUndeadLegacyLocalizationFormat() throws {
+    let contents = "\u{FEFF}" + """
+    Key,English
+
+    campfireActivate,"Open Campfire"
+    caffeineBuzz,"Caffeine Rush"
+    caffeineBuzzDesc,"Caffeine gives you energy, keeping you warmer."
+    """
+
+    let url = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString)
+        .appendingPathExtension("txt")
+
+    try contents.write(
+        to: url,
+        atomically: true,
+        encoding: .utf8
+    )
+
+    defer {
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    let entries = try LocalizationLoader().load(from: url)
+
+    #expect(entries.count == 3)
+
+    #expect(
+        entries.first {
+            $0.key == "campfireActivate"
+        }?.english == "Open Campfire"
+    )
+
+    #expect(
+        entries.first {
+            $0.key == "caffeineBuzzDesc"
+        }?.english == "Caffeine gives you energy, keeping you warmer."
+    )
+}

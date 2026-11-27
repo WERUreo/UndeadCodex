@@ -13,13 +13,15 @@ struct LocalizationLoader {
 
         let parser = CSVParser()
         let headers = parser.parse(String(headerLine))
+            .map { $0.lowercased() }
 
-        guard let keyIndex = headers.firstIndex(of: "Key"),
-            let fileIndex = headers.firstIndex(of: "File"),
-            let typeIndex = headers.firstIndex(of: "Type"),
+        guard let keyIndex = headers.firstIndex(of: "key"),
             let englishIndex = headers.firstIndex(of: "english") else {
             return []
         }
+
+        let fileIndex = headers.firstIndex(of: "file")
+        let typeIndex = headers.firstIndex(of: "type")
 
         var entries: [LocalizationEntry] = []
 
@@ -27,16 +29,22 @@ struct LocalizationLoader {
             let fields = parser.parse(String(line))
 
             guard fields.indices.contains(keyIndex),
-                fields.indices.contains(fileIndex),
-                fields.indices.contains(typeIndex),
                 fields.indices.contains(englishIndex) else {
                 continue
             }
 
+            let file = fileIndex.flatMap {
+                fields.indices.contains($0) ? fields[$0] : nil
+            } ?? ""
+
+            let type = typeIndex.flatMap {
+                fields.indices.contains($0) ? fields[$0] : nil
+            } ?? ""
+
             entries.append(LocalizationEntry(
                 key: fields[keyIndex],
-                file: fields[fileIndex],
-                type: fields[typeIndex],
+                file: file,
+                type: type,
                 english: fields[englishIndex]
             ))
         }
