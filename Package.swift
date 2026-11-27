@@ -4,7 +4,13 @@
 import PackageDescription
 
 let package = Package(
-    name: "LootGoblin",
+    name: "UndeadCodex",
+    products: [
+        .executable(
+            name: "undead-codex",
+            targets: ["UndeadCodex"]
+        ),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -16,15 +22,15 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "LootGoblin",
+            name: "UndeadCodex",
             dependencies: ["CLibXML2"],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency"),
             ],
         ),
         .testTarget(
-            name: "LootGoblinTests",
-            dependencies: ["LootGoblin"],
+            name: "UndeadCodexTests",
+            dependencies: ["UndeadCodex"],
             resources: [
                 .copy("Fixtures")
             ],

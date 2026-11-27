@@ -4,21 +4,21 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:LootGoblin}",
-            "name": "Debug LootGoblin",
-            "target": "LootGoblin",
+            "cwd": "${workspaceFolder}",
+            "name": "Debug UndeadCodex",
+            "target": "undead-codex",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug LootGoblin"
+            "preLaunchTask": "swift: Build Debug undead-codex"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:LootGoblin}",
-            "name": "Release LootGoblin",
-            "target": "LootGoblin",
+            "cwd": "${workspaceFolder}",
+            "name": "Release UndeadCodex",
+            "target": "undead-codex",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release LootGoblin"
+            "preLaunchTask": "swift: Build Release undead-codex"
         }
     ]
 }
