@@ -6,3 +6,18 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+
+# Local configuration
+/LocalConfig/
+
+# Local game data and generated datasets
+/GameData/
+/Datasets/
+
+# Local VS Code settings
+.vscode/settings.json
