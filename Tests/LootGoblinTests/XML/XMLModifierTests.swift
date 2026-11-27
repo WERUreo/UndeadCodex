@@ -432,11 +432,13 @@ func allowsRepeatedIncludes() throws {
     }
 }
 
-@Test
+@Test(
+    .tags(.integration),
+    .enabled(if: IntegrationTestConfiguration.undeadLegacyDirectory != nil)
+)
 func appliesUndeadLegacyBlockPatches() throws {
-    let gameDirectory = URL(
-        fileURLWithPath: "/mnt/c/Program Files (x86)/Steam/steamapps/common/7 Days To Die - Undead Legacy",
-        isDirectory: true
+    let gameDirectory = try #require(
+        IntegrationTestConfiguration.undeadLegacyDirectory
     )
 
     let vanillaURL = gameDirectory

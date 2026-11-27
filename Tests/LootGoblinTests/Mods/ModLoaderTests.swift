@@ -62,11 +62,13 @@ func loadsBlocksWithSelectedMod() throws {
     #expect(drops.first?.attributes["count"] == "3,6")
 }
 
-@Test
+@Test(
+    .tags(.integration),
+    .enabled(if: IntegrationTestConfiguration.undeadLegacyDirectory != nil)
+)
 func loadsUndeadLegacyBlocks() throws {
-    let gameDirectory = URL(
-        fileURLWithPath: "/mnt/c/Program Files (x86)/Steam/steamapps/common/7 Days To Die - Undead Legacy",
-        isDirectory: true
+    let gameDirectory = try #require(
+        IntegrationTestConfiguration.undeadLegacyDirectory
     )
 
     let modDirectory = gameDirectory
